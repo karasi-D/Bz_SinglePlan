@@ -1,0 +1,2 @@
+Planner/bz_plan:Planner/plan_env:uav_simulator/Utils/odom_visualization:uav_simulator/Utils/pose_utils:uav_simulator/Utils/quadrotor_msgs:uav_simulator/Utils/rviz_plugins:uav_simulator/Utils/traj_server:uav_simulator/Utils/waypoint_generator:uav_simulator/map_server/local_sensing:uav_simulator/map_server/map_generator:uav_simulator/so3_control:uav_simulator/so3_quadrotor_simulator
+-DCATKIN_DEVEL_PREFIX=/home/karasi/my_code/Bz_Planner/catkin_ws/devel -DCMAKE_INSTALL_PREFIX=/home/karasi/my_code/Bz_Planner/catkin_ws/install -G Unix Makefiles

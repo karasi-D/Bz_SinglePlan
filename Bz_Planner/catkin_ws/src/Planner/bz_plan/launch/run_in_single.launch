@@ -1,0 +1,118 @@
+<launch>
+
+<arg name="map_size_x" default="50.0"/>
+<arg name="map_size_y" default="50.0"/>
+<arg name="map_size_z" default=" 5.0"/>
+
+<arg name="init_x" default="-20.0"/>
+<arg name="init_y" default="-20.0"/>
+<arg name="init_z" default="  0.5"/>
+
+<arg name="sensing_horizon"  default="8.0" />
+<arg name="sensing_rate"     default="30.0"/>
+<arg name="estimation_rate"  default="30.0"/>
+
+<arg name="map_frame_name"  default="/world"/>
+
+    <!--pkg: 功能包名: 可执行文件名 name:节点名-->>
+  <node pkg="bz_plan" type="bz_plan_node" name="bz_plan_node" output="screen">
+      <remap from="~waypoints"      to="/waypoint_generator/waypoints"/>
+      <remap from="~odometry"       to="/visual_slam/odom"/>
+      <remap from="~map"            to="/pcl_render_node/cloud"/> 
+      <!--remap from="~command"        to="/position_cmd"/--> 
+
+      <param name="optimization/poly_order"  value="8"/> 
+      <param name="optimization/min_order"   value="3.0"/> 
+      <param name="map/x_size"       value="$(arg map_size_x)"/>
+      <param name="map/y_size"       value="$(arg map_size_y)"/>
+      <param name="map/z_size"       value="$(arg map_size_z)"/>
+      
+      <param name="map/x_local_size" value="16.0"/>
+      <param name="map/y_local_size" value="16.0"/>
+      <param name="map/z_local_size" value="8.0" />
+
+      <param name="map/margin"       value="0.2" />
+      <param name="planning/init_x"  value="$(arg init_x)"/>
+      <param name="planning/init_y"  value="$(arg init_y)"/>
+      <param name="planning/init_z"  value="$(arg init_z)"/>
+      <param name="planning/inflate_iter"  value="200"  />
+      <param name="planning/step_length"   value="1"    />
+      <param name="planning/cube_margin"   value="0.0"  />
+      <param name="planning/max_vel"       value="2.0"  />
+      <param name="planning/max_acc"       value="2.0"  />
+      <param name="planning/check_horizon" value="10.0" />
+      <param name="planning/stop_horizon"  value=" 3.0" />
+      <param name="planning/is_limit_vel"  value="true" />
+      <param name="planning/is_limit_acc"  value="false"/>
+
+      <param name="vis/vis_traj_width" value="0.15"/>
+      <param name="vis/is_proj_cube"   value="false"/>
+  </node>
+
+  <!-- Trajectory Command server -->
+  <node pkg="bz_plan" type="traj_server" name="traj_server" output="screen" launch-prefix="">
+        <remap from="~/odometry" to="/visual_slam/odom"/>
+        <remap from="~/trajectory" to="/bz_plan_node/trajectory"/>
+        <!--remap from = "~position_command"  to = "/position_cmd"/-->
+
+        <param name="optimization/poly_order_min" value="3" /> 
+        <param name="optimization/poly_order_max" value="12"/> 
+  </node>
+
+  <!-- Set the goal -->
+  <node pkg="waypoint_generator" name="waypoint_generator" type="waypoint_generator" output="screen">
+      <remap from="~goal"           to="/goal"/>
+      <remap from="~waypoints"      to="/waypoint_generator/waypoints"/>
+      <param name="waypoint_type"   value="manual-lonely-waypoint"/>    
+  </node>
+
+    <!-- Random Map Generator -->
+  <node pkg ="map_generator" name ="random_complex" type ="random_complex" output = "screen">    
+      <remap from="~odometry"       to="/visual_slam/odom"/>
+
+      <param name="init_state_x"        value="$(arg init_x)"/>
+      <param name="init_state_y"        value="$(arg init_y)"/>
+
+      <param name="map/x_size"          value="$(arg map_size_x)" />
+      <param name="map/y_size"          value="$(arg map_size_y)" />
+      <param name="map/z_size"          value="$(arg map_size_z)" />
+      <param name="map_frame_name"      value="$(arg map_frame_name)"/>
+
+      <param name="map/circle_num" value="50"/>        
+      <param name="map/obs_num"    value="400"/>        
+      <param name="map/resolution" value="0.2"/>     
+
+      <param name="ObstacleShape/lower_rad" value="0.2"/>
+      <param name="ObstacleShape/upper_rad" value="1.0"/>
+      <param name="ObstacleShape/lower_hei" value="1.0"/>
+      <param name="ObstacleShape/upper_hei" value="6.0"/>
+      <param name="CircleShape/lower_circle_rad"   value="0.6"/>        
+      <param name="CircleShape/upper_circle_rad"   value="2.5"/>        
+    
+      <param name="sensing/rate"   value="1.0"/>        
+  </node>
+
+   <!-- Quadrotor odom: render + Simulator + Controller + Visualization-->  
+   <include file="$(find bz_plan)/launch/simulator.xml">
+      <arg name="init_x" value="$(arg init_x)"/>
+      <arg name="init_y" value="$(arg init_y)"/>
+      <arg name="init_z" value="$(arg init_z)"/>
+      <arg name="map_size_x_" value="$(arg map_size_x)"/>
+      <arg name="map_size_y_" value="$(arg map_size_y)"/>
+      <arg name="map_size_z_" value="$(arg map_size_z)"/>
+      
+      <arg name="sensing_horizon" value="$(arg sensing_horizon)"/>
+      <arg name="sensing_rate" value="$(arg sensing_rate)"/>
+      <arg name="estimation_rate" value="$(arg estimation_rate)"/>
+
+      <!--arg name="map_frame_name" value="$(arg map_frame_name)"/-->
+
+  </include>
+ 
+  <!--dynamic param set-->>
+  <node pkg="rqt_reconfigure" name="rqt_reconfigure" type="rqt_reconfigure" output="screen" />
+  
+  <node name="rvizvisualisation" pkg="rviz" type="rviz" output="log" args="-d $(find bz_plan)/launch/rviz_config/simulation.rviz" />
+  
+
+</launch>

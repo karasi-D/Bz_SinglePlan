@@ -1,0 +1,8 @@
+prefix=/home/karasi/my_code/Bz_Planner/catkin_ws/devel
+
+Name: bz_plan
+Description: Description of bz_plan
+Version: 0.0.0
+Cflags: -I/home/karasi/my_code/Bz_Planner/catkin_ws/devel/include -I/home/karasi/my_code/Bz_Planner/catkin_ws/src/Planner/bz_plan/include
+Libs: -L${prefix}/lib 
+Requires: 

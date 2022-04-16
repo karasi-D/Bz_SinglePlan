@@ -1,0 +1,7 @@
+\subsubsection usage Usage
+\verbatim
+<node name="bz_plan" pkg="bz_plan" type="bz_plan">
+  <param name="is_use_fm" type="bool" value="True" />
+</node>
+\endverbatim
+

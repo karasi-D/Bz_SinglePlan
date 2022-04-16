@@ -1,0 +1,68 @@
+<launch>
+  <!-- size of map, change the size inflate x, y, z according to your application -->
+  <arg name="map_size_x"/>
+  <arg name="map_size_y"/>
+  <arg name="map_size_z"/>
+  <arg name="init_x"/>
+  <arg name="init_y"/>
+  <arg name="init_z"/>
+
+  <arg name="sensing_horizon"/>
+  <arg name="sensing_rate"/>
+  <arg name="estimation_rate"/>
+
+  <arg name="uav_id"/>
+
+  <!-- topic of your odometry such as VIO or LIO -->
+  <!--arg name="odom_topic"/-->
+
+  <!-- main algorithm params -->
+  <include file="$(find bz_plan)/launch/bz_plan_param.xml">
+      <arg name="uav_id" value="$(arg uav_id)"/>
+      <remap from="~waypoints"      to="/waypoint_generator/waypoints"/>
+      <remap from="~odometry"       to="/uav_$(arg uav_id)_visual_slam/odom"/>
+      <!--remap from="~odometry"       to="/uav_$(arg uav_id)_$(arg odom_topic)"/-->
+      <remap from="~map"            to="/uav_$(arg uav_id)_pcl_render_node/cloud"/> 
+      <!--remap from="~command"        to="/position_cmd"/--> 
+
+      <arg name="map/x_size"       value="$(arg map_size_x)"/>
+      <arg name="map/y_size"       value="$(arg map_size_y)"/>
+      <arg name="map/z_size"       value="$(arg map_size_z)"/>
+      <arg name="planning/init_x"  value="$(arg init_x)"/>
+      <arg name="planning/init_y"  value="$(arg init_y)"/>
+      <arg name="planning/init_z"  value="$(arg init_z)"/>
+    
+  </include>
+
+  <!-- Trajectory Command server -->
+  <node pkg="bz_plan" type="traj_server" name="uav_$(arg uav_id)_traj_server" output="screen" launch-prefix="">
+
+        <remap from="~/odometry" to="/uav_$(arg uav_id)_visual_slam/odom"/>
+        <remap from="~/trajectory" to="/uav_$(arg uav_id)_bz_plan_node/trajectory"/>
+        <!--remap from = "~position_command"  to = "/position_cmd"/-->
+
+        <param name="optimization/poly_order_min" value="3" /> 
+        <param name="optimization/poly_order_max" value="12"/> 
+  </node>
+
+  <!-- Quadrotor odom: render + Simulator + Controller + Visualization-->
+  <!--add uav_id-->     
+   <include file="$(find bz_plan)/launch/simulator.xml">
+    <arg name="uav_id" value="$(arg uav_id)"/>
+
+      <arg name="init_x" value="$(arg init_x)"/>
+      <arg name="init_y" value="$(arg init_y)"/>
+      <arg name="init_z" value="$(arg init_z)"/>
+      <arg name="map_size_x_" value="$(arg map_size_x)"/>
+      <arg name="map_size_y_" value="$(arg map_size_y)"/>
+      <arg name="map_size_z_" value="$(arg map_size_z)"/>
+      
+      <arg name="sensing_horizon" value="$(arg sensing_horizon)"/>
+      <arg name="sensing_rate" value="$(arg sensing_rate)"/>
+      <arg name="estimation_rate" value="$(arg estimation_rate)"/>
+
+      <!--arg name="map_frame_name" value="$(arg map_frame_name)"/-->
+
+  </include>
+
+</launch>
